@@ -7,7 +7,18 @@ import (
 	"log"
 )
 
+func getFullName(update tgbotapi.Update) string {
+	firstName := update.Message.From.FirstName
+	lastName := update.Message.From.LastName
+
+	if lastName != "" {
+		return fmt.Sprintf("%s %s", firstName, lastName)
+	}
+	return firstName
+}
+
 func main() {
+
 	bot, err := tgbotapi.NewBotAPI("7893146217:AAEHa4WabeS2FFxko92TiPBBLvRCO0yqjB4")
 	if err != nil {
 		log.Panic(err)
@@ -26,6 +37,7 @@ func main() {
 	for update := range updates {
 		if update.Message != nil {
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			fullName := getFullName(update)
 
 			var msg tgbotapi.MessageConfig
 
@@ -37,9 +49,10 @@ func main() {
 				} else {
 					// Форматируем сообщение о погоде
 					weatherMsg := formatWeatherMessage(currentWeather.Temperature, currentWeather.Windspeed, avgTemp)
-
+					helloMsg := fmt.Sprintf("Привет, %s! Рад тебя видеть!\n\n", fullName)
+					messageMsg := helloMsg + weatherMsg
 					// Создаем сообщение с поддержкой Markdown
-					msg = tgbotapi.NewMessage(update.Message.Chat.ID, weatherMsg)
+					msg = tgbotapi.NewMessage(update.Message.Chat.ID, messageMsg)
 					msg.ParseMode = "Markdown"
 				}
 			case "help":
